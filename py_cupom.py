@@ -11,20 +11,27 @@
 #!/usr/bin/env python
 
 """
-This module was created to generate short alphanumeric ids for a discount cupom
-application. It uses a base32 encoding that has the following attributes:
+This module was created to generate short alphanumeric ids for a discount coupon
+application. It can also be useful to generate shared session keys for games and
+any other application where you need an easy to share alphanumeric code.
 
-    * Case insensitive
-    * Pad to a given number of digits
-    * Code translates to/from valid integers
-    * Does not use 'L'/'l' and 'I'/'i' to avoid mistakes
-    * 5 bit per digit
-    * Luhn mod N algorithm included for checksum digit generation
+It can be used as a short hash for integers, but in fact is uses a base 32
+notation that has the following attributes:
+
+    * Collision-free 1 to 1 mapping for positive integers
+    * Somewhat compact: encodes 5 bit per digit
+    * Generates a case insensitive code
+    * Pads to a given number of digits
+    * Does not use 'L'/'l', 'I'/'i' and 'O','o' to avoid mistakes with 0/1.
+    * Optional Luhn mod N algorithm included for checksum digit
+
+Maximum range can be calculated as 32 elevated to the number of digits used.
 
 You can customize FW_MAP and BW_MAP to make codes harder to guess, but this
-algorithm was *not* designed to be crypto safe.
+algorithm was not designed to be crypto safe.
 
-Sorry, guys, only Python >= 2.6 for now.
+Sorry, guys, only Python >= 2.6 for now. Backporting python 2.6+ bin() is left
+as an exercise to the reader.
 """
 
 import math
@@ -129,22 +136,23 @@ def check(code):
     remainder = total % n
     return remainder == 0
 
-def encode(n, digits=None, check_digit=False):
+def encode(n, length=None, check_digit=False):
     """Encode integer to base 32 shorter case insensitive alphanumeric code.
 
 Parameters:
-    digits: pads to 'digits' number of digits
+    digits: pads result to 'length' digits
     check_digit: appends Luhn mod N check digit if True (default=False).
     """
-    if digits:
-        digits = int(digits)
-        if int(n) > 32**digits:
-            raise OverflowError
+    n = abs(n) # positive integers only
+    if length:
+        length = int(length)
+        if int(n) > 32**length:
+            raise OverflowError('%d bigger than 32**%d' % (n, length))
     else:
-        digits = int(math.ceil(math.log(int(n), 32)))
+        length = int(math.ceil(math.log(int(n), 32)))
     # Map binary string to base 32
-    padded_bin = bin(abs(n))[2:].rjust(5*digits,'0')
-    code = ''.join([ FW_MAP[padded_bin[i*5:i*5+5]] for i in range(0, digits) ])
+    padded_bin = bin(n)[2:].rjust(5*length,'0')
+    code = ''.join([ FW_MAP[padded_bin[i*5:i*5+5]] for i in range(0, length) ])
     return code + digit(code) if check_digit else code
 
 def decode(s):
