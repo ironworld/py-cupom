@@ -124,7 +124,7 @@ def check(code):
         factor = 1 if factor == 2 else 2
         addend = (addend / n) + (addend % n)
         total += addend
-    remainder = soma % n
+    remainder = total % n
     return remainder == 0
 
 def encode(n, digits=5, check_digit=False):
