@@ -136,7 +136,7 @@ Parameters:
     """
     if int(n) > decode('Z' * digits):
         raise OverflowError
-    padded_bin = bin(n)[2:].rjust(5*digits,'0')
+    padded_bin = bin(abs(n))[2:].rjust(5*digits,'0')
     code = ''.join([ FW_MAP[padded_bin[i*5:i*5+5]] for i in range(0, digits) ])
     return code + digit(code) if check_digit else code
 
