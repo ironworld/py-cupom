@@ -28,7 +28,7 @@ notation that has the following attributes:
 Maximum range can be calculated as 32 elevated to the number of digits used.
 
 You can customize FW_MAP and BW_MAP to make codes harder to guess, but this
-algorithm was not designed to be crypto safe. I made my map I made 0=A because
+algorithm was not designed to be crypto safe. In my map I made 0=A because
 I prefer AAAY1 over 000Y1 when padding. This has some side-effects:
 
    * AAAAA1 == AAA1 == 1 (000001 == 0001 == 1)
