@@ -27,6 +27,8 @@ algorithm was *not* designed to be crypto safe.
 Sorry, guys, only Python >= 2.6 for now.
 """
 
+import math
+
 FW_MAP = {
     '01010':	'0',
     '00001':	'1',
@@ -127,15 +129,20 @@ def check(code):
     remainder = total % n
     return remainder == 0
 
-def encode(n, digits=5, check_digit=False):
+def encode(n, digits=None, check_digit=False):
     """Encode integer to base 32 shorter case insensitive alphanumeric code.
 
 Parameters:
-    digits: pads to 'digits' number of digits (default=5)
+    digits: pads to 'digits' number of digits
     check_digit: appends Luhn mod N check digit if True (default=False).
     """
-    if int(n) > decode('Z' * digits):
-        raise OverflowError
+    if digits:
+        digits = int(digits)
+        if int(n) > 32**digits:
+            raise OverflowError
+    else:
+        digits = int(math.ceil(math.log(int(n), 32)))
+    # Map binary string to base 32
     padded_bin = bin(abs(n))[2:].rjust(5*digits,'0')
     code = ''.join([ FW_MAP[padded_bin[i*5:i*5+5]] for i in range(0, digits) ])
     return code + digit(code) if check_digit else code
